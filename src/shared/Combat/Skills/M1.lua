@@ -15,10 +15,10 @@ local Ragdoll = require(script.Parent.Parent.StatusEffects.Ragdoll)
 
 -- GANTI dengan animation ID milikmu. Selama masih 0, skill tetap jalan tanpa animasi.
 local ANIMATIONS = {
-	"rbxassetid://0", -- M1_1 : jab kiri
-	"rbxassetid://0", -- M1_2 : cross kanan
-	"rbxassetid://0", -- M1_3 : hook / tendangan
-	"rbxassetid://0", -- M1_4 : finisher (heavy)
+	"rbxassetid://17466343474", -- M1_1 : jab kiri
+	"rbxassetid://17466346690", -- M1_2 : cross kanan
+	"rbxassetid://17466349372", -- M1_3 : hook / tendangan
+	"rbxassetid://17466351685", -- M1_4 : finisher (heavy)
 }
 
 local DAMAGE = { 2, 2, 3, 6 } -- damage per hit combo
