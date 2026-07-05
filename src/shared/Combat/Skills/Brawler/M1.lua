@@ -1,4 +1,4 @@
--- M1: melee combo 4 hit (gaya reference: hitbox MuchachoHitbox yang mengikuti pemain,
+-- M1: melee combo 4 hit (hitbox EZ Hitbox yang mengikuti pemain via wrapper Core/Hitbox,
 -- damage/stun/knockback lewat HitResolver sehingga block/parry/guardbreak otomatis berlaku).
 -- Hit 1-3 : damage kecil + stun singkat (combo nyambung)
 -- Hit 4   : finisher -- damage besar + knockback kuat
