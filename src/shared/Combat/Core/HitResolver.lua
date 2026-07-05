@@ -39,9 +39,9 @@ local PARRY_ATTACKER_STUN = 1.2 -- stun untuk penyerang yang ke-parry
 
 -- Animasi reaksi kena pukul (opsional). Ganti dengan ID milikmu.
 local HIT_REACTION_ANIMS = {
-	light = "rbxassetid://0",
-	heavy = "rbxassetid://0",
-	special = "rbxassetid://0",
+	light = "rbxassetid://130317038940940",
+	heavy = "rbxassetid://105982074091135",
+	special = "rbxassetid://94600359195395",
 }
 
 --==================================================--

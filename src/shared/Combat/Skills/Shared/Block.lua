@@ -13,7 +13,7 @@ local AnimationProvider = require(Combat.Core.AnimationProvider)
 
 --==================================================--
 local PARRY_WINDOW = 0.25 -- detik pertama block yang menghitung sebagai parry
-local BLOCK_ANIM = "rbxassetid://0" -- GANTI dengan animasi block-mu
+local BLOCK_ANIM = "rbxassetid://96451109941165" -- GANTI dengan animasi block-mu
 --==================================================--
 
 local Block = WCS.RegisterHoldableSkill("Block")
