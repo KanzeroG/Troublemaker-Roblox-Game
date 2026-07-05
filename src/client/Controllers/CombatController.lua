@@ -217,16 +217,67 @@ local function showStunBar(model: Model, duration: number)
 	Debris:AddItem(bar, duration)
 end
 
+-- Bar guard HP di atas kepala blocker: makin terkikis makin pendek & memerah.
+-- Muncul saat guard kena hit, hilang sendiri kalau tidak kena hit lagi.
+local guardBars: { [Model]: { gui: BillboardGui, frame: GuiObject?, lastUpdate: number } } = {}
+
+local function removeGuardBar(model: Model)
+	local entry = guardBars[model]
+	if entry then
+		entry.gui:Destroy()
+		guardBars[model] = nil
+	end
+end
+
+local function showGuardBar(model: Model, ratio: number)
+	local head = model and (model:FindFirstChild("Head") or getTorso(model))
+	local template = getAsset("misc", "stunbar")
+	if not head or not template then
+		return
+	end
+
+	local entry = guardBars[model]
+	if not entry or not entry.gui.Parent then
+		local gui = template:Clone()
+		gui.Adornee = head
+		gui.StudsOffset += Vector3.new(0, 0.6, 0) -- sedikit di atas posisi stunbar
+		gui.Parent = head
+		entry = { gui = gui, frame = gui:FindFirstChild("Frame") :: GuiObject?, lastUpdate = 0 }
+		guardBars[model] = entry
+	end
+
+	entry.lastUpdate = os.clock()
+	local frame = entry.frame
+	if frame then
+		ratio = math.clamp(ratio, 0, 1)
+		frame.Size = UDim2.new(ratio, 0, 1, 0)
+		frame.Position = UDim2.new((1 - ratio) / 2, 0, 0, 0)
+		-- biru (penuh) -> merah (hampir pecah)
+		frame.BackgroundColor3 = Color3.fromRGB(255, 60, 60):Lerp(Color3.fromRGB(80, 140, 255), ratio)
+	end
+
+	-- hilang sendiri kalau 1.5 detik tidak kena hit lagi
+	task.delay(1.6, function()
+		local current = guardBars[model]
+		if current == entry and os.clock() - entry.lastUpdate >= 1.5 then
+			removeGuardBar(model)
+		end
+	end)
+end
+
 local function onVFX(kind: string, model: Model, arg)
 	if kind == "Hit" then
 		emit(getAsset("hit", "punch"), getTorso(model))
 	elseif kind == "Block" then
 		emit(getAsset("hit", "punch", "circle"), getTorso(model))
 		flashHighlight(model, Color3.fromRGB(80, 140, 255), 0.15)
+	elseif kind == "GuardBar" then
+		showGuardBar(model, arg)
 	elseif kind == "Parry" then
 		emit(getAsset("misc", "blast"), getTorso(model))
 		flashHighlight(model, Color3.fromRGB(255, 255, 255), 0.3)
 	elseif kind == "GuardBreak" then
+		removeGuardBar(model)
 		emit(getAsset("hit", "punch", "shards"), getTorso(model))
 		flashHighlight(model, Color3.fromRGB(255, 60, 60), 0.5)
 	elseif kind == "GuardBreakWindup" then
