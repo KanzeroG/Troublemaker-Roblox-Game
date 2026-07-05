@@ -18,20 +18,12 @@ local AnimationProvider = require(Combat.Core.AnimationProvider)
 -- KONFIGURASI (silakan tweak)
 --==================================================--
 
--- GANTI dengan animation ID milikmu. Selama masih 0, skill tetap jalan tanpa animasi.
-local ANIMATIONS = {
-	"rbxassetid://103345170539869", -- M1_1 : jab kiri
-	"rbxassetid://110981237071409", -- M1_2 : cross kanan
-	"rbxassetid://84999084297864", -- M1_3 : hook / tendangan
-	"rbxassetid://95539017376715", -- M1_4 : finisher (heavy)
-}
-
 -- Parameter per-hit combo. Size/Offset = bentuk & posisi hitbox (mengikuti HumanoidRootPart).
 local COMBO = {
-	{ Size = Vector3.new(4, 4.5, 4.5), Offset = CFrame.new(0, 0, -2.5), Damage = 4, Stun = 0.35, Knockback = 6, Reaction = "light" },
-	{ Size = Vector3.new(4, 4.5, 4.5), Offset = CFrame.new(0, 0.3, -2.5), Damage = 4, Stun = 0.35, Knockback = 6, Reaction = "light" },
-	{ Size = Vector3.new(4.5, 4.5, 5), Offset = CFrame.new(0, 0, -2.7), Damage = 5, Stun = 0.4, Knockback = 8, Reaction = "light" },
-	{ Size = Vector3.new(5, 5, 5.5), Offset = CFrame.new(0, 0.2, -3), Damage = 9, Knockback = 45, Ragdoll = 1.5, Reaction = "heavy" },
+	{ Size = Vector3.new(4, 4.5, 4.5), Offset = CFrame.new(0, 0, -2.5), Damage = 4, Stun = 0.35, Knockback = 6, Reaction = "1" },
+	{ Size = Vector3.new(4, 4.5, 4.5), Offset = CFrame.new(0, 0.3, -2.5), Damage = 4, Stun = 0.35, Knockback = 6, Reaction = "2" },
+	{ Size = Vector3.new(4.5, 4.5, 5), Offset = CFrame.new(0, 0, -2.7), Damage = 5, Stun = 0.4, Knockback = 8, Reaction = "1" },
+	{ Size = Vector3.new(5, 5, 5.5), Offset = CFrame.new(0, 0.2, -3), Damage = 9, Knockback = 45, Ragdoll = 1.5, Reaction = "2" },
 }
 
 local MAX_COMBO = #COMBO
@@ -76,21 +68,12 @@ function M1:OnStartServer()
 	if animator then
 		local style = characterModel:GetAttribute("Style") or "Melee"
 		local animation = AnimationProvider.get(style, "M1_" .. comboIndex)
-		local track
 		if animation then
-			track = animator:LoadAnimation(animation)
-		else
-			-- Fallback ke ID bawaan jika foldernya belum ada di Studio
-			local animationId = ANIMATIONS[comboIndex]
-			if animationId and animationId ~= "rbxassetid://0" then
-				local fallbackAnim = Instance.new("Animation")
-				fallbackAnim.AnimationId = animationId
-				track = animator:LoadAnimation(fallbackAnim)
+			local track = animator:LoadAnimation(animation)
+			if track then
+				track.Priority = Enum.AnimationPriority.Action
+				track:Play()
 			end
-		end
-		if track then
-			track.Priority = Enum.AnimationPriority.Action
-			track:Play()
 		end
 	end
 

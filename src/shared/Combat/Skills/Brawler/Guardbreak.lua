@@ -13,7 +13,6 @@ local Blocking = require(Combat.StatusEffects.Blocking)
 local AnimationProvider = require(Combat.Core.AnimationProvider)
 
 --==================================================--
-local GB_ANIM = "rbxassetid://0" -- GANTI dengan animasi guardbreak-mu
 local WINDUP = 0.45 -- telegraph "!" sebelum hitbox aktif
 local HITBOX_ACTIVE = 0.2
 local COOLDOWN = 8
@@ -46,20 +45,12 @@ function Guardbreak:OnStartServer()
 	if animator then
 		local style = characterModel:GetAttribute("Style") or "Melee"
 		local animation = AnimationProvider.get(style, "Guardbreak")
-		local track
 		if animation then
-			track = animator:LoadAnimation(animation)
-		else
-			-- Fallback ke ID bawaan jika foldernya belum ada di Studio
-			if GB_ANIM ~= "rbxassetid://0" then
-				local fallbackAnim = Instance.new("Animation")
-				fallbackAnim.AnimationId = GB_ANIM
-				track = animator:LoadAnimation(fallbackAnim)
+			local track = animator:LoadAnimation(animation)
+			if track then
+				track.Priority = Enum.AnimationPriority.Action
+				track:Play()
 			end
-		end
-		if track then
-			track.Priority = Enum.AnimationPriority.Action
-			track:Play()
 		end
 	end
 	Remotes.Get("VFX"):FireAllClients("GuardBreakWindup", characterModel, WINDUP)
@@ -76,7 +67,7 @@ function Guardbreak:OnStartServer()
 			StunDuration = STUN,
 			Knockback = KNOCKBACK,
 			GuardBreak = true,
-			HitReaction = "heavy",
+			HitReaction = "2",
 		})
 	end)
 

@@ -37,15 +37,6 @@ local GUARDBREAK_STUN = 2 -- stun saat block dipatahkan skill Guardbreak
 local GUARD_CRUSH_STUN = 1.5 -- stun saat guard pecah karena terkikis combo (guard HP habis)
 local PARRY_ATTACKER_STUN = 1.2 -- stun untuk penyerang yang ke-parry
 
--- Animasi reaksi kena pukul (opsional). Ganti dengan ID milikmu.
-local HIT_REACTION_ANIMS = {
-	light = "rbxassetid://130317038940940",
-	heavy = "rbxassetid://105982074091135",
-	special = "rbxassetid://94600359195395",
-}
-
---==================================================--
-
 local HitResolver = {}
 
 -- true kalau penyerang berada di belakang korban (bypass block)
@@ -68,23 +59,12 @@ local function playHitReaction(humanoid: Humanoid, reaction: string?)
 	-- Cari reaksi pukulan dari folder Shared, mis. "HitReactionLight" atau "HitReactionHeavy"
 	local animName = "HitReaction" .. reaction:sub(1,1):upper() .. reaction:sub(2)
 	local animation = AnimationProvider.getShared(animName)
-	local track
 	if animation then
-		track = animator:LoadAnimation(animation)
-	else
-		-- Fallback ke ID bawaan jika foldernya belum ada di Studio
-		local animId = HIT_REACTION_ANIMS[reaction]
-		if not animId or animId == "rbxassetid://0" then
-			return
+		local track = animator:LoadAnimation(animation)
+		if track then
+			track.Priority = Enum.AnimationPriority.Action
+			track:Play()
 		end
-		local fallbackAnim = Instance.new("Animation")
-		fallbackAnim.AnimationId = animId
-		track = animator:LoadAnimation(fallbackAnim)
-	end
-
-	if track then
-		track.Priority = Enum.AnimationPriority.Action
-		track:Play()
 	end
 end
 

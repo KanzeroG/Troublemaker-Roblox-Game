@@ -1,1 +1,1 @@
-return require(script.Parent._Index["howmanysmall_janitor@1.18.3"].src)
+return require(script.Parent._Index.janitor)

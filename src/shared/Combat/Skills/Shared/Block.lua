@@ -13,7 +13,6 @@ local AnimationProvider = require(Combat.Core.AnimationProvider)
 
 --==================================================--
 local PARRY_WINDOW = 0.25 -- detik pertama block yang menghitung sebagai parry
-local BLOCK_ANIM = "rbxassetid://96451109941165" -- GANTI dengan animasi block-mu
 --==================================================--
 
 local Block = WCS.RegisterHoldableSkill("Block")
@@ -41,13 +40,6 @@ function Block:OnStartServer()
 		local animation = AnimationProvider.get(style, "Block")
 		if animation then
 			self._blockTrack = animator:LoadAnimation(animation)
-		else
-			-- Fallback ke ID bawaan jika foldernya belum ada di Studio
-			if BLOCK_ANIM ~= "rbxassetid://0" then
-				local fallbackAnim = Instance.new("Animation")
-				fallbackAnim.AnimationId = BLOCK_ANIM
-				self._blockTrack = animator:LoadAnimation(fallbackAnim)
-			end
 		end
 		if self._blockTrack then
 			self._blockTrack.Priority = Enum.AnimationPriority.Action
