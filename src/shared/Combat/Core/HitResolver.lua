@@ -121,6 +121,11 @@ function HitResolver.resolve(sourceSkill, victimHumanoid: Humanoid, params)
 	local victimRoot = victimModel:FindFirstChild("HumanoidRootPart")
 	local victimChar = WCS.Character.GetCharacterFromInstance(victimModel)
 
+	-- target yang sedang terkena ragdoll (jatuh/downed) kebal terhadap serangan
+	if victimChar and #victimChar:GetAllActiveStatusEffectsOfType(Ragdoll) > 0 then
+		return nil
+	end
+
 	local guardBreak = params.GuardBreak == true
 	local back = (attackerRoot and victimRoot) and isBehind(attackerRoot, victimRoot) or false
 
@@ -210,7 +215,11 @@ function HitResolver.resolve(sourceSkill, victimHumanoid: Humanoid, params)
 	end
 
 	applyKnockback(victimModel, attackerRoot, params.Knockback)
-	playHitReaction(victimHumanoid, params.HitReaction)
+
+	-- Hanya putar reaksi animasi jika target tidak terkena ragdoll
+	if not (params.RagdollDuration and params.RagdollDuration > 0) then
+		playHitReaction(victimHumanoid, params.HitReaction)
+	end
 
 	return "hit"
 end
