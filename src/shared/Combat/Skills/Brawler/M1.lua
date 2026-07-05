@@ -27,10 +27,10 @@ local ANIMATIONS = {
 
 -- Parameter per-hit combo. Size/Offset = bentuk & posisi hitbox (mengikuti HumanoidRootPart).
 local COMBO = {
-	{ Size = Vector3.new(5, 5, 6), Offset = CFrame.new(0, 0, -3), Damage = 4, Stun = 0.35, Knockback = 6, Reaction = "light" },
-	{ Size = Vector3.new(5, 5, 6), Offset = CFrame.new(0, 0.5, -3), Damage = 4, Stun = 0.35, Knockback = 6, Reaction = "light" },
-	{ Size = Vector3.new(5.5, 5, 6.5), Offset = CFrame.new(0, 0, -3.2), Damage = 5, Stun = 0.4, Knockback = 8, Reaction = "light" },
-	{ Size = Vector3.new(6, 5.5, 7), Offset = CFrame.new(0, 0.2, -3.5), Damage = 9, Knockback = 45, Ragdoll = 1.5, Reaction = "heavy" },
+	{ Size = Vector3.new(4, 4.5, 4.5), Offset = CFrame.new(0, 0, -2.5), Damage = 4, Stun = 0.35, Knockback = 6, Reaction = "light" },
+	{ Size = Vector3.new(4, 4.5, 4.5), Offset = CFrame.new(0, 0.3, -2.5), Damage = 4, Stun = 0.35, Knockback = 6, Reaction = "light" },
+	{ Size = Vector3.new(4.5, 4.5, 5), Offset = CFrame.new(0, 0, -2.7), Damage = 5, Stun = 0.4, Knockback = 8, Reaction = "light" },
+	{ Size = Vector3.new(5, 5, 5.5), Offset = CFrame.new(0, 0.2, -3), Damage = 9, Knockback = 45, Ragdoll = 1.5, Reaction = "heavy" },
 }
 
 local MAX_COMBO = #COMBO

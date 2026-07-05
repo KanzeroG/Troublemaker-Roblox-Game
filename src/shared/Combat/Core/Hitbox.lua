@@ -1,13 +1,14 @@
 -- Hitbox: wrapper tipis di atas EZ Hitbox (breezy1214/hitbox).
--- API dijaga SAMA seperti sebelumnya supaya skill (M1, Guardbreak) tidak perlu diubah:
+-- API dijaga SAMA supaya skill (M1, Guardbreak) tidak perlu diubah:
 --   local box = Hitbox.Create(size, rootPart, offset)
 --   box.Touched:Connect(function(hitPart, victimHumanoid) ... end)
 --   box:Start() ; box:Stop()
 --
--- EZ Hitbox unggul: :WeldTo mengikuti pemain + velocity-prediction (target lari cepat
--- tetap kena), blacklist penyerang, debounce per-target.
+-- Pola MELEE sesuai README EZ Hitbox: hitbox ditaruh di posisi TETAP saat serangan
+-- keluar (rootPart.CFrame * offset dihitung sekali) -- TIDAK mengikuti pemain.
+-- (`:WeldTo` di README hanya untuk proyektil/serangan bergerak, bukan pukulan.)
 --
--- Debug "Show Hitbox": server broadcast bentuk hitbox ke client yang OPT-IN (tak berubah).
+-- Debug "Show Hitbox": server broadcast bentuk hitbox (statis) ke client yang OPT-IN.
 
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
@@ -18,7 +19,7 @@ local Remotes = require(script.Parent.Remotes)
 
 local Hitbox = {}
 
-local DEBUG_DURATION = 0.5 -- lama box debug tampil
+local DEBUG_DURATION = 0.2 -- kira-kira sepanjang window hitbox aktif (bukan 0.5 lagi)
 
 -- Server-only: siapa yang mau lihat hitbox (dari Settings toggle)
 local debugViewers: { [Player]: true } = {}
@@ -32,17 +33,18 @@ if RunService:IsServer() then
 	end)
 end
 
-local function broadcastDebug(cframeOrInstance, size: Vector3, offset: CFrame)
+-- worldCFrame = posisi tetap hitbox (bukan instance) supaya box debug juga diam
+local function broadcastDebug(worldCFrame: CFrame, size: Vector3)
 	if next(debugViewers) == nil then
 		return
 	end
 	local event = Remotes.Get("HitboxDebug")
 	for player in debugViewers do
-		event:FireClient(player, cframeOrInstance, size, offset, DEBUG_DURATION)
+		event:FireClient(player, worldCFrame, size, CFrame.identity, DEBUG_DURATION)
 	end
 end
 
--- Signal minimal untuk meniru API .Touched lama (Muchacho) -> skill tak perlu diubah.
+-- Signal minimal untuk meniru API .Touched lama -> skill tak perlu diubah.
 local function createSignal()
 	local handlers = {}
 	return {
@@ -67,24 +69,24 @@ end
 
 function Hitbox.Create(size: Vector3, cframeOrInstance, offset: CFrame?)
 	offset = offset or CFrame.identity
-	local isPart = typeof(cframeOrInstance) == "Instance"
-	local initialCFrame = if isPart then cframeOrInstance.CFrame * offset else cframeOrInstance * offset
+	-- Hitung posisi TETAP sekali di sini (saat serangan keluar). Tidak mengikuti.
+	local worldCFrame = if typeof(cframeOrInstance) == "Instance"
+		then cframeOrInstance.CFrame * offset
+		else cframeOrInstance * offset
 
 	local params = {
 		Size = size,
-		CFrame = initialCFrame,
+		CFrame = worldCFrame,
 		LookingFor = "Humanoid",
-		DebounceTime = 0, -- tag sekali; box ini pendek & di-destroy tiap swing
+		DebounceTime = 0, -- tag sekali; box pendek & di-destroy tiap swing
 		Lifetime = 0, -- lifecycle diatur manual (Start/Stop)
 	}
-	if isPart then
+	if typeof(cframeOrInstance) == "Instance" then
 		params.Blacklist = { cframeOrInstance.Parent } -- jangan kena diri sendiri
 	end
 
+	-- TANPA :WeldTo -> hitbox diam di worldCFrame
 	local ez = EZHitbox.new(params)
-	if isPart then
-		ez:WeldTo(cframeOrInstance, offset) -- ikuti pemain + velocity prediction
-	end
 
 	local touched = createSignal()
 	ez.OnHit:Connect(function(characters)
@@ -99,7 +101,7 @@ function Hitbox.Create(size: Vector3, cframeOrInstance, offset: CFrame?)
 	local box = { Touched = touched }
 
 	function box:Start()
-		broadcastDebug(cframeOrInstance, size, offset)
+		broadcastDebug(worldCFrame, size)
 		ez:Start()
 	end
 
