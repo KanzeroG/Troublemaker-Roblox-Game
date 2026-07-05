@@ -8,6 +8,7 @@
 local ContextActionService = game:GetService("ContextActionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 
@@ -98,6 +99,41 @@ local function onKnockback(direction: Vector3)
 	lv.VectorVelocity = direction
 	lv.Parent = attachment
 	Debris:AddItem(attachment, 0.15)
+end
+
+--|| Debug: gambar hitbox (hanya diterima kalau toggle "Show Hitbox" ON) ||--
+
+local function onHitboxDebug(cframeOrInstance, size: Vector3, offset: CFrame, duration: number)
+	local part = Instance.new("Part")
+	part.Size = size
+	part.Anchored = true
+	part.CanCollide = false
+	part.CanQuery = false
+	part.CanTouch = false
+	part.Transparency = 0.55
+	part.Color = Color3.fromRGB(255, 0, 0)
+	part.Material = Enum.Material.ForceField
+	part.Parent = workspace
+
+	local function currentCFrame(): CFrame?
+		if typeof(cframeOrInstance) == "Instance" then
+			local base = cframeOrInstance :: BasePart
+			return base.Parent and base.CFrame * offset or nil
+		end
+		return cframeOrInstance * offset
+	end
+
+	local startTime = os.clock()
+	local connection
+	connection = RunService.RenderStepped:Connect(function()
+		local cf = currentCFrame()
+		if not cf or os.clock() - startTime >= duration then
+			connection:Disconnect()
+			part:Destroy()
+			return
+		end
+		part.CFrame = cf
+	end)
 end
 
 --|| Ragdoll (client ini network owner karakternya sendiri, jadi state harus diubah di sini) ||--
@@ -309,6 +345,7 @@ function CombatController:KnitStart()
 	Remotes.Get("Knockback").OnClientEvent:Connect(onKnockback)
 	Remotes.Get("VFX").OnClientEvent:Connect(onVFX)
 	Remotes.Get("Ragdoll").OnClientEvent:Connect(onRagdoll)
+	Remotes.Get("HitboxDebug").OnClientEvent:Connect(onHitboxDebug)
 end
 
 return CombatController
