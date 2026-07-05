@@ -16,6 +16,7 @@ local Skills = script.Parent.Skills
 
 -- Shared (semua style punya)
 local Block = require(Skills.Shared.Block)
+local Push = require(Skills.Shared.Push)
 
 -- Brawler (tangan kosong)
 local M1 = require(Skills.Brawler.M1)
@@ -26,6 +27,7 @@ local Movesets = {
 		M1,
 		Guardbreak,
 		Block,
+		Push,
 	}),
 
 	-- Contoh style berikutnya:

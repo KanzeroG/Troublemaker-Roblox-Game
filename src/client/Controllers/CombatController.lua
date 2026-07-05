@@ -85,6 +85,21 @@ local function onGuardbreakAction(_actionName: string, inputState: Enum.UserInpu
 	return Enum.ContextActionResult.Pass
 end
 
+local function onPushAction(_actionName: string, inputState: Enum.UserInputState)
+	if inputState ~= Enum.UserInputState.Begin then
+		return Enum.ContextActionResult.Pass
+	end
+	local character = WCS.Character.GetLocalCharacter()
+	if not character then
+		return Enum.ContextActionResult.Pass
+	end
+	local push = character:GetSkillFromString("Push")
+	if push then
+		push:Start()
+	end
+	return Enum.ContextActionResult.Pass
+end
+
 --|| Knockback (di-apply pada karakter milik client ini) ||--
 
 local function onKnockback(direction: Vector3)
@@ -312,6 +327,7 @@ function CombatController:KnitStart()
 	ContextActionService:BindAction("Combat_M1", onM1Action, true, Enum.UserInputType.MouseButton1)
 	ContextActionService:BindAction("Combat_Block", onBlockAction, true, Enum.KeyCode.F)
 	ContextActionService:BindAction("Combat_Guardbreak", onGuardbreakAction, true, Enum.KeyCode.R)
+	ContextActionService:BindAction("Combat_Push", onPushAction, true, Enum.KeyCode.G)
 
 	Remotes.Get("Knockback").OnClientEvent:Connect(onKnockback)
 	Remotes.Get("VFX").OnClientEvent:Connect(onVFX)
