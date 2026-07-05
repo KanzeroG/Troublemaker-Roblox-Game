@@ -24,6 +24,7 @@ local Stun = require(StatusEffects.Stun)
 local Ragdoll = require(StatusEffects.Ragdoll)
 
 local Remotes = require(script.Parent.Remotes)
+local AnimationProvider = require(script.Parent.AnimationProvider)
 
 --==================================================--
 -- KONFIGURASI
@@ -59,19 +60,32 @@ local function playHitReaction(humanoid: Humanoid, reaction: string?)
 	if not reaction then
 		return
 	end
-	local animId = HIT_REACTION_ANIMS[reaction]
-	if not animId or animId == "rbxassetid://0" then
-		return
-	end
 	local animator = humanoid:FindFirstChildOfClass("Animator")
 	if not animator then
 		return
 	end
-	local animation = Instance.new("Animation")
-	animation.AnimationId = animId
-	local track = animator:LoadAnimation(animation)
-	track.Priority = Enum.AnimationPriority.Action
-	track:Play()
+
+	-- Cari reaksi pukulan dari folder Shared, mis. "HitReactionLight" atau "HitReactionHeavy"
+	local animName = "HitReaction" .. reaction:sub(1,1):upper() .. reaction:sub(2)
+	local animation = AnimationProvider.getShared(animName)
+	local track
+	if animation then
+		track = animator:LoadAnimation(animation)
+	else
+		-- Fallback ke ID bawaan jika foldernya belum ada di Studio
+		local animId = HIT_REACTION_ANIMS[reaction]
+		if not animId or animId == "rbxassetid://0" then
+			return
+		end
+		local fallbackAnim = Instance.new("Animation")
+		fallbackAnim.AnimationId = animId
+		track = animator:LoadAnimation(fallbackAnim)
+	end
+
+	if track then
+		track.Priority = Enum.AnimationPriority.Action
+		track:Play()
+	end
 end
 
 local function applyKnockback(victimModel: Model, attackerRoot: BasePart?, knockback)

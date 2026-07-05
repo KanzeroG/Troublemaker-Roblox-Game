@@ -9,6 +9,7 @@ local Combat = script.Parent.Parent.Parent
 local Blocking = require(Combat.StatusEffects.Blocking)
 local Parry = require(Combat.StatusEffects.Parry)
 local Stun = require(Combat.StatusEffects.Stun)
+local AnimationProvider = require(Combat.Core.AnimationProvider)
 
 --==================================================--
 local PARRY_WINDOW = 0.25 -- detik pertama block yang menghitung sebagai parry
@@ -32,14 +33,23 @@ function Block:OnStartServer()
 	Parry.new(character):Start(PARRY_WINDOW)
 
 	-- animasi block (opsional)
-	if BLOCK_ANIM ~= "rbxassetid://0" then
-		local model = character.Instance
-		local humanoid = model and model:FindFirstChildOfClass("Humanoid")
-		local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
-		if animator then
-			local animation = Instance.new("Animation")
-			animation.AnimationId = BLOCK_ANIM
+	local model = character.Instance
+	local humanoid = model and model:FindFirstChildOfClass("Humanoid")
+	local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
+	if animator then
+		local style = model:GetAttribute("Style") or "Melee"
+		local animation = AnimationProvider.get(style, "Block")
+		if animation then
 			self._blockTrack = animator:LoadAnimation(animation)
+		else
+			-- Fallback ke ID bawaan jika foldernya belum ada di Studio
+			if BLOCK_ANIM ~= "rbxassetid://0" then
+				local fallbackAnim = Instance.new("Animation")
+				fallbackAnim.AnimationId = BLOCK_ANIM
+				self._blockTrack = animator:LoadAnimation(fallbackAnim)
+			end
+		end
+		if self._blockTrack then
 			self._blockTrack.Priority = Enum.AnimationPriority.Action
 			self._blockTrack.Looped = true
 			self._blockTrack:Play()

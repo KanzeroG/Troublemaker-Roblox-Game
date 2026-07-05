@@ -10,6 +10,7 @@ local HitResolver = require(Combat.Core.HitResolver)
 local Remotes = require(Combat.Core.Remotes)
 local Stun = require(Combat.StatusEffects.Stun)
 local Blocking = require(Combat.StatusEffects.Blocking)
+local AnimationProvider = require(Combat.Core.AnimationProvider)
 
 --==================================================--
 local GB_ANIM = "rbxassetid://0" -- GANTI dengan animasi guardbreak-mu
@@ -41,12 +42,22 @@ function Guardbreak:OnStartServer()
 	end
 
 	-- animasi + telegraph "!"
-	if GB_ANIM ~= "rbxassetid://0" then
-		local animator = humanoid:FindFirstChildOfClass("Animator")
-		if animator then
-			local animation = Instance.new("Animation")
-			animation.AnimationId = GB_ANIM
-			local track = animator:LoadAnimation(animation)
+	local animator = humanoid:FindFirstChildOfClass("Animator")
+	if animator then
+		local style = characterModel:GetAttribute("Style") or "Melee"
+		local animation = AnimationProvider.get(style, "Guardbreak")
+		local track
+		if animation then
+			track = animator:LoadAnimation(animation)
+		else
+			-- Fallback ke ID bawaan jika foldernya belum ada di Studio
+			if GB_ANIM ~= "rbxassetid://0" then
+				local fallbackAnim = Instance.new("Animation")
+				fallbackAnim.AnimationId = GB_ANIM
+				track = animator:LoadAnimation(fallbackAnim)
+			end
+		end
+		if track then
 			track.Priority = Enum.AnimationPriority.Action
 			track:Play()
 		end

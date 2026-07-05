@@ -12,6 +12,7 @@ local Hitbox = require(Combat.Core.Hitbox)
 local HitResolver = require(Combat.Core.HitResolver)
 local Stun = require(Combat.StatusEffects.Stun)
 local Blocking = require(Combat.StatusEffects.Blocking)
+local AnimationProvider = require(Combat.Core.AnimationProvider)
 
 --==================================================--
 -- KONFIGURASI (silakan tweak)
@@ -71,13 +72,23 @@ function M1:OnStartServer()
 	local data = COMBO[comboIndex]
 
 	-- mainkan animasi (di-load server-side, otomatis tereplikasi)
-	local animationId = ANIMATIONS[comboIndex]
-	if animationId and animationId ~= "rbxassetid://0" then
-		local animator = humanoid:FindFirstChildOfClass("Animator")
-		if animator then
-			local animation = Instance.new("Animation")
-			animation.AnimationId = animationId
-			local track = animator:LoadAnimation(animation)
+	local animator = humanoid:FindFirstChildOfClass("Animator")
+	if animator then
+		local style = characterModel:GetAttribute("Style") or "Melee"
+		local animation = AnimationProvider.get(style, "M1_" .. comboIndex)
+		local track
+		if animation then
+			track = animator:LoadAnimation(animation)
+		else
+			-- Fallback ke ID bawaan jika foldernya belum ada di Studio
+			local animationId = ANIMATIONS[comboIndex]
+			if animationId and animationId ~= "rbxassetid://0" then
+				local fallbackAnim = Instance.new("Animation")
+				fallbackAnim.AnimationId = animationId
+				track = animator:LoadAnimation(fallbackAnim)
+			end
+		end
+		if track then
 			track.Priority = Enum.AnimationPriority.Action
 			track:Play()
 		end

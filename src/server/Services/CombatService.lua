@@ -42,6 +42,7 @@ local function characterAdded(character: Model)
 
 	-- kasih fighting style (moveset = paket skill; lihat Combat/Movesets.lua)
 	wcsCharacter:ApplyMoveset(DEFAULT_MOVESET)
+	character:SetAttribute("Style", "Melee")
 
 	-- bersihkan saat karakter dihapus (mati/respawn)
 	character.Destroying:Connect(function()
