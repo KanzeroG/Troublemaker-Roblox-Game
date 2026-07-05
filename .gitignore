@@ -10,3 +10,10 @@
 
 .vscode
 .DS_STORE
+
+# AI agent config/instructions (lokal, tidak di-commit)
+.claude/
+CLAUDE.md
+
+# Project referensi (hanya untuk dipelajari, bukan bagian game)
+Reference/

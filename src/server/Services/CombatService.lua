@@ -12,7 +12,12 @@ local Knit = require(ReplicatedStorage.Packages.Knit)
 local WCS = require(ReplicatedStorage.Packages.WCS)
 
 local CombatFolder = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Combat")
-local M1 = require(CombatFolder.Skills.M1)
+require(CombatFolder.Core.Remotes) -- bikin CombatRemotes (Knockback/VFX) di server
+
+local Movesets = require(CombatFolder.Movesets)
+
+-- Style default untuk pemain baru (nanti bisa per-pemain dari data save)
+local DEFAULT_MOVESET = Movesets.Brawler
 
 local CombatService = Knit.CreateService({
 	Name = "CombatService",
@@ -35,8 +40,8 @@ local function characterAdded(character: Model)
 		end
 	end)
 
-	-- kasih skill combat
-	M1.new(wcsCharacter)
+	-- kasih fighting style (moveset = paket skill; lihat Combat/Movesets.lua)
+	wcsCharacter:ApplyMoveset(DEFAULT_MOVESET)
 
 	-- bersihkan saat karakter dihapus (mati/respawn)
 	character.Destroying:Connect(function()
