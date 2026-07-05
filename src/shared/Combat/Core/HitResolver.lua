@@ -161,7 +161,7 @@ function HitResolver.resolve(sourceSkill, victimHumanoid: Humanoid, params)
 				victimHumanoid:TakeDamage(chip)
 			end
 			Stun.new(victimChar):Start(BLOCK_STUN)
-			VFX:FireAllClients("Block", victimModel)
+			VFX:FireAllClients("Block", victimModel, chip)
 			VFX:FireAllClients("GuardBar", victimModel, blockingEffect.GuardHealth / blockingEffect.MaxGuardHealth)
 			return "blocked"
 		end
@@ -193,7 +193,7 @@ function HitResolver.resolve(sourceSkill, victimHumanoid: Humanoid, params)
 		victimHumanoid:TakeDamage(params.Damage)
 	end
 
-	VFX:FireAllClients("Hit", victimModel)
+	VFX:FireAllClients("Hit", victimModel, params.Damage)
 
 	if params.RagdollDuration and params.RagdollDuration > 0 and victimChar then
 		-- ragdoll menggantikan stun (ragdoll sudah bikin tak bisa gerak).

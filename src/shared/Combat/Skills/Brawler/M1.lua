@@ -86,7 +86,7 @@ function M1:OnStartServer()
 	-- windup sebelum hitbox aktif
 	task.wait(WINDUP)
 
-	-- hitbox mengikuti rootPart (inilah "hitbox bagus" dari reference)
+	-- hitbox statis di depan rootPart (tidak mengikuti pergerakan pemain saat aktif)
 	local box = Hitbox.Create(data.Size, rootPart, data.Offset)
 	box.Touched:Connect(function(_hitPart, victimHumanoid)
 		if victimHumanoid == humanoid then

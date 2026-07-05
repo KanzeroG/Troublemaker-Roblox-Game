@@ -1,0 +1,12 @@
+[package]
+name = "ddust1n/camerashaker"
+description = "A fork of Sleitnick's RbxCameraShaker, fixed for wally."
+version = "0.0.4"
+license = "MIT"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+
+exclude = ["**"]
+include = ["src", "src/**", "default.project.json", "LICENSE", "wally.toml"]
+
+[dependencies]

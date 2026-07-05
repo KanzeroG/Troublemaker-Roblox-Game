@@ -23,9 +23,11 @@ local Remotes = require(CombatFolder.Core.Remotes)
 -- Folder aset VFX (di-copy dari reference ke ReplicatedStorage.Assets.vfx).
 -- Kalau tidak ada (mis. build fresh tanpa Assets), VFX di-skip tanpa error.
 local VFX_FOLDER: Folder? = nil
+local COMBAT_FX: Folder? = nil
 do
 	local assets = ReplicatedStorage:WaitForChild("Assets", 10)
 	VFX_FOLDER = assets and assets:FindFirstChild("vfx")
+	COMBAT_FX = VFX_FOLDER and (VFX_FOLDER:FindFirstChild("FX") or VFX_FOLDER:FindFirstChild("fx"))
 end
 
 local player = Players.LocalPlayer
@@ -302,20 +304,36 @@ local function showGuardBar(model: Model, ratio: number)
 end
 
 local function onVFX(kind: string, model: Model, arg)
+	local torso = getTorso(model)
+	local VfxController = Knit.GetController("VfxController")
+	local SoundController = Knit.GetController("SoundController")
+
 	if kind == "Hit" then
-		emit(getAsset("hit", "punch"), getTorso(model))
+		VfxController:PlayVFX("Basic Hit", torso)
+		SoundController:PlaySound3D("BasicHit", torso)
+		VfxController:PlayCameraShake(torso and torso.Position or Vector3.zero, 2.5, 45)
+		if arg then
+			VfxController:ShowDamageIndicator(arg, model)
+		end
 	elseif kind == "Block" then
-		emit(getAsset("hit", "punch", "circle"), getTorso(model))
-		flashHighlight(model, Color3.fromRGB(80, 140, 255), 0.15)
+		VfxController:PlayVFX("Block Hit", torso)
+		SoundController:PlaySound3D("BlockHit", torso)
+		VfxController:PlayCameraShake(torso and torso.Position or Vector3.zero, 1.5, 30)
+		if arg then
+			VfxController:ShowDamageIndicator(arg, model)
+		end
 	elseif kind == "GuardBar" then
 		showGuardBar(model, arg)
 	elseif kind == "Parry" then
-		emit(getAsset("misc", "blast"), getTorso(model))
-		flashHighlight(model, Color3.fromRGB(255, 255, 255), 0.3)
+		VfxController:PlayVFX("Perfect Block", torso)
+		SoundController:PlaySound3D("PerfectBlock1", torso)
+		SoundController:PlaySound3D("PerfectBlock2", torso)
+		VfxController:PlayCameraShake(torso and torso.Position or Vector3.zero, 4, 60)
 	elseif kind == "GuardBreak" then
 		removeGuardBar(model)
-		emit(getAsset("hit", "punch", "shards"), getTorso(model))
-		flashHighlight(model, Color3.fromRGB(255, 60, 60), 0.5)
+		VfxController:PlayVFX("Block Break", torso)
+		SoundController:PlaySound3D("BlockBreak", torso)
+		VfxController:PlayCameraShake(torso and torso.Position or Vector3.zero, 5, 80)
 	elseif kind == "GuardBreakWindup" then
 		showGuardbreakMark(model, arg)
 	elseif kind == "Stun" then
@@ -337,6 +355,7 @@ function CombatController:KnitInit()
 end
 
 function CombatController:KnitStart()
+
 	-- true = otomatis bikin tombol touch di mobile
 	ContextActionService:BindAction("Combat_M1", onM1Action, true, Enum.UserInputType.MouseButton1)
 	ContextActionService:BindAction("Combat_Block", onBlockAction, true, Enum.KeyCode.F)
