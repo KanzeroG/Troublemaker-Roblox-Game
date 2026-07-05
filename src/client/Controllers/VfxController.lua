@@ -135,6 +135,72 @@ function VfxController:PlayVFX(name: string, target: BasePart?)
 	end
 end
 
+local guardShields: { [Model]: { gui: BillboardGui, grad: UGradient?, frame: GuiObject?, lastUpdate: number } } = {}
+
+-- Menghapus visual tameng block
+function VfxController:RemoveGuardShield(model: Model)
+	local entry = guardShields[model]
+	if entry then
+		entry.gui:Destroy()
+		guardShields[model] = nil
+	end
+end
+
+-- Memunculkan tameng block BillboardGui yang berkurang secara melingkar (menggunakan UIGradient Y-Offset)
+function VfxController:ShowGuardShield(model: Model, ratio: number)
+	local hrp = model and model:FindFirstChild("HumanoidRootPart")
+	if not hrp then
+		return
+	end
+
+	local assets = ReplicatedStorage:FindFirstChild("Assets")
+	local template = assets and assets:FindFirstChild("vfx") and assets.vfx:FindFirstChild("misc") and assets.vfx.misc:FindFirstChild("BlockShield")
+	if not template then
+		-- Fallback ke stunbar jika BlockShield belum di-copy
+		template = assets and assets:FindFirstChild("vfx") and assets.vfx:FindFirstChild("misc") and assets.vfx.misc:FindFirstChild("stunbar")
+	end
+	if not template then
+		return
+	end
+
+	local entry = guardShields[model]
+	if not entry or not entry.gui.Parent then
+		local gui = template:Clone()
+		gui.Adornee = hrp
+		gui.Enabled = true
+		gui.Parent = hrp
+
+		local shield = gui:FindFirstChild("Shield")
+		local grad = shield and shield:FindFirstChildOfClass("UIGradient")
+		local frame = gui:FindFirstChild("Frame")
+
+		entry = { gui = gui, grad = grad, frame = frame, lastUpdate = 0 }
+		guardShields[model] = entry
+	end
+
+	entry.lastUpdate = os.clock()
+	ratio = math.clamp(ratio, 0, 1)
+
+	if entry.grad then
+		-- Shield visual Y-Offset (1 = Penuh, berkurang ke 0)
+		entry.grad.Offset = Vector2.new(0, ratio)
+	elseif entry.frame then
+		-- Fallback standard stunbar frame
+		entry.frame.Size = UDim2.new(ratio, 0, 1, 0)
+		entry.frame.Position = UDim2.new((1 - ratio) / 2, 0, 0, 0)
+		entry.frame.BackgroundColor3 = Color3.fromRGB(255, 60, 60):Lerp(Color3.fromRGB(80, 140, 255), ratio)
+	end
+
+	-- Hilang otomatis setelah 1.5 detik jika tidak menerima damage lagi
+	task.delay(1.6, function()
+		local current = guardShields[model]
+		if current == entry and os.clock() - entry.lastUpdate >= 1.5 then
+			self:RemoveGuardShield(model)
+		end
+	end)
+end
+
+
 function VfxController:KnitStart()
 	-- Initialize CameraShaker if present
 	local CameraShakerModule = Packages:FindFirstChild("CameraShaker")
