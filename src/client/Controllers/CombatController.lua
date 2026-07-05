@@ -100,6 +100,21 @@ local function onKnockback(direction: Vector3)
 	Debris:AddItem(attachment, 0.15)
 end
 
+--|| Ragdoll (client ini network owner karakternya sendiri, jadi state harus diubah di sini) ||--
+
+local function onRagdoll(active: boolean)
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if not humanoid then
+		return
+	end
+	if active then
+		humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+	else
+		humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+	end
+end
+
 --|| VFX (pakai aset partikel asli dari reference: ReplicatedStorage.Assets.vfx) ||--
 
 -- Ambil aset bersarang dengan aman, mis. getAsset("hit", "punch")
@@ -242,6 +257,7 @@ function CombatController:KnitStart()
 
 	Remotes.Get("Knockback").OnClientEvent:Connect(onKnockback)
 	Remotes.Get("VFX").OnClientEvent:Connect(onVFX)
+	Remotes.Get("Ragdoll").OnClientEvent:Connect(onRagdoll)
 end
 
 return CombatController

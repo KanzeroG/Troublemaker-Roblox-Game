@@ -6,7 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local FOLDER_NAME = "CombatRemotes"
-local EVENT_NAMES = { "Knockback", "VFX" }
+local EVENT_NAMES = { "Knockback", "VFX", "Ragdoll" }
 
 local Remotes = {}
 
