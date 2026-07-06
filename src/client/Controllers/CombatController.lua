@@ -308,6 +308,46 @@ local function onVFX(kind: string, model: Model, arg)
 	end
 end
 
+local function bindMeleeActions()
+	ContextActionService:BindAction("Combat_M1", onM1Action, true, Enum.UserInputType.MouseButton1)
+	ContextActionService:BindAction("Combat_Block", onBlockAction, true, Enum.KeyCode.F)
+	ContextActionService:BindAction("Combat_Guardbreak", onGuardbreakAction, true, Enum.KeyCode.R)
+end
+
+local function unbindMeleeActions()
+	ContextActionService:UnbindAction("Combat_M1")
+	ContextActionService:UnbindAction("Combat_Block")
+	ContextActionService:UnbindAction("Combat_Guardbreak")
+end
+
+local function setupMeleeToolListeners(character)
+	if not character then
+		return
+	end
+
+	-- Listen for child added (equipped)
+	character.ChildAdded:Connect(function(child)
+		if child:IsA("Tool") and child.Name == "Melee" then
+			bindMeleeActions()
+		end
+	end)
+
+	-- Listen for child removed (unequipped)
+	character.ChildRemoved:Connect(function(child)
+		if child:IsA("Tool") and child.Name == "Melee" then
+			unbindMeleeActions()
+		end
+	end)
+
+	-- Check initial state
+	local tool = character:FindFirstChildOfClass("Tool")
+	if tool and tool.Name == "Melee" then
+		bindMeleeActions()
+	else
+		unbindMeleeActions()
+	end
+end
+
 --|| Knit Lifecycle ||--
 
 function CombatController:KnitInit()
@@ -324,10 +364,12 @@ end
 function CombatController:KnitStart()
 
 	-- true = otomatis bikin tombol touch di mobile
-	ContextActionService:BindAction("Combat_M1", onM1Action, true, Enum.UserInputType.MouseButton1)
-	ContextActionService:BindAction("Combat_Block", onBlockAction, true, Enum.KeyCode.F)
-	ContextActionService:BindAction("Combat_Guardbreak", onGuardbreakAction, true, Enum.KeyCode.R)
 	ContextActionService:BindAction("Combat_Push", onPushAction, true, Enum.KeyCode.G)
+
+	player.CharacterAdded:Connect(setupMeleeToolListeners)
+	if player.Character then
+		setupMeleeToolListeners(player.Character)
+	end
 
 	Remotes.Get("Knockback").OnClientEvent:Connect(onKnockback)
 	Remotes.Get("VFX").OnClientEvent:Connect(onVFX)

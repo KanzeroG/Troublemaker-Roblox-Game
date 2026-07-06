@@ -40,9 +40,28 @@ local function characterAdded(character: Model)
 		end
 	end)
 
-	-- kasih fighting style (moveset = paket skill; lihat Combat/Movesets.lua)
-	wcsCharacter:ApplyMoveset(DEFAULT_MOVESET)
-	character:SetAttribute("Style", "Melee")
+	-- Listen for Melee tool equipping
+	character.ChildAdded:Connect(function(child)
+		if child:IsA("Tool") and child.Name == "Melee" then
+			wcsCharacter:ApplyMoveset(DEFAULT_MOVESET)
+			character:SetAttribute("Style", "Melee")
+		end
+	end)
+
+	-- Listen for Melee tool unequipping
+	character.ChildRemoved:Connect(function(child)
+		if child:IsA("Tool") and child.Name == "Melee" then
+			wcsCharacter:ClearMoveset()
+			character:SetAttribute("Style", nil)
+		end
+	end)
+
+	-- Cek jika Tool sudah ter-equip sejak awal spawn
+	local activeTool = character:FindFirstChildOfClass("Tool")
+	if activeTool and activeTool.Name == "Melee" then
+		wcsCharacter:ApplyMoveset(DEFAULT_MOVESET)
+		character:SetAttribute("Style", "Melee")
+	end
 
 	-- bersihkan saat karakter dihapus (mati/respawn)
 	character.Destroying:Connect(function()
@@ -53,7 +72,9 @@ local function characterAdded(character: Model)
 end
 
 local function playerAdded(player: Player)
-	player.CharacterAdded:Connect(characterAdded)
+	player.CharacterAdded:Connect(function(character)
+		characterAdded(character)
+	end)
 	if player.Character then
 		characterAdded(player.Character)
 	end

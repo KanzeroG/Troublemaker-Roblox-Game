@@ -371,7 +371,6 @@ function Preloader:EndPreload()
 	-- Re-enable core UI if it was disabled
 	if config.showLoadingScreen then
 		StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true)
-		StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false)
 
 		if touchGUIFrame then
 			touchGUIFrame.Visible = true
